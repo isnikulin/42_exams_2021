@@ -4,6 +4,6 @@ At ecole42, exams must be finished in an enviroment with no internet access, and
 Projects are selected randomly.
 
 Directories are uploaded as I complete the exams.
-* **[RANK 02]**(https://github.com/Preposterone/42_exams_2021/tree/master/Rank_02)
+* **[[RANK 02](https://github.com/Preposterone/42_exams_2021/tree/master/Rank_02)]**
 
 This work is published under the terms of **[42 Unlicense](https://github.com/gcamerli/42unlicense)**.
