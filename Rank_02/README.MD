@@ -1,6 +1,6 @@
 ## Exam Rank 02 (first exam on the new cursus)
 
-This exam requires you to complete 4 projects of varying difficulty:
+This exam requires you to complete 2 out of 4 projects of varying difficulty:
 
 * **union** [subject](https://github.com/Preposterone/42_exams_2021/blob/master/Rank_02/subjects/union.txt) | [solution](https://github.com/Preposterone/42_exams_2021/blob/master/Rank_02/union/union.c)
 (print only unique characters encountered in 2 arguments)
