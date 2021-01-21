@@ -1,10 +1,9 @@
 #include "get_next_line.h"
 
-/*expand line to + 1 char and put char in it*/
 char *ft_strjoin(char *line, char c)
 {
-	int i = 0, j = 0;
 	char *tmp;
+	int i = 0, j = 0;
 	if (!line)
 	{
 		tmp = (char*)malloc(2);
@@ -30,14 +29,14 @@ char *ft_strjoin(char *line, char c)
 
 int get_next_line(char **line)
 {
-	char c = 0;
 	char *tmp = NULL;
-	while(read(0, &c, 1) && c != '\n')
+	char c = 0;
+	if (tmp == NULL)
+		tmp = ft_strjoin(tmp, '\0');
+	while (read(0, &c, 1) && c != '\n')
 	{
 		tmp = ft_strjoin(tmp, c);
 	}
-	if (tmp == NULL)
-		tmp = ft_strjoin(tmp, '\0');
 	*line = tmp;
 	return (c=='\n');
 }

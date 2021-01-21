@@ -1,6 +1,6 @@
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
-# include <unistd.h>
-# include <stdlib.h>
+#ifndef GNL
+#define GNL
+#include <stdlib.h>
+#include <unistd.h>
 int get_next_line(char **line);
 #endif
