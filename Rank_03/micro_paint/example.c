@@ -116,6 +116,7 @@ int drawing(FILE *file, char **draw, t_zone *zone)
             return (0);
         get_draw(draw, &tmp, zone);
     }
+	printf("count: %d\n", count);
     if (count != (-1))
         return (0);
     return (1);

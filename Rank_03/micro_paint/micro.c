@@ -3,101 +3,141 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ARG_ERR "Error: argument"
-#define F_ERR "Error: Operation file corrupted"
+#define ERR_ARG "Error: argument"
+#define ERR_OPFILE "Error: Operation file corrupted"
 
-typedef struct  s_zone
+typedef struct s_canvas
 {
-    int w;
-    int h;
-    char bg;
-}               t_zone;
+	int	w;
+	int h;
+	char bg;
+}				t_canvas;
 
-typedef struct  s_rec
+typedef struct shape
 {
-    char type;
-    float x;
-    float y;
-    float w;
-    float h;
-    char color;
-}               t_rec;
+	char type;
+	float x;
+	float y;
+	float w;
+	float h;
+	char color;
+}				t_shape;
 
-int ft_strlen(char *str)
+int ft_strlen(char *s)
 {
-    if (!str)
-        return (0);
-	int i = -1;
-	while (str[++i]);
+	int i = 0;
+
+	if (s)
+	{
+		while (s[i])
+			i++;
+	}
 	return (i);
 }
 
-int ft_putstr(char *str, int ret)
+int ft_putstr(char *s, int ret)
 {
-    write(1, str, ft_strlen(str));
-    write(1, "\n", 1);
-    return (ret);
+	write(1, s, ft_strlen(s));
+	write(1, "\n", 1);
+	return (ret);
 }
 
-char *ft_check_draw_zone(FILE *fd, t_zone *zone)
+int is_wh_correct(int a)
 {
-    int count = fscanf(fd, "%d %d %c\n", &zone->w, &zone->h, &zone->bg);
-    if (count != 3 ) 
-        return (NULL);
-    else if (!(zone->w >= 0 && zone->w <= 300 && zone->h >= 0 && zone->h <= 300))
-        return (NULL);
-    char *ret = (char *)calloc(1, zone->h * zone->w + 1);
-    return (memset(ret, zone->bg, zone->h * zone->w));
+	return (a >= 0 && a<= 300);
 }
 
-//printf("%c %f %f %f %f %c\n", line->type, line->x, line->y, line->w, line->h, line->color); 
-int read_config(FILE *fd, t_rec *line)
+char *ft_make_canvas(t_canvas *canvas, FILE *file)
 {
-    int count = 0;
-    while ((count = fscanf(fd, "%c %f %f %f %f %c\n", &line->type, &line->x, &line->y, &line->w, 
-              &line->h, &line->color)) == 6)
-    {
-            ;    //code for muting characters
-    }
-    if (count !=  (-1))
-        return (0);
-    return (1);
+	int count = fscanf(file, "%d %d %c\n", &canvas->w, &canvas->h, &canvas->bg);
+	char *ret = NULL;
+	if (count == 3 && is_wh_correct(canvas->w) && is_wh_correct(canvas->h))
+		ret = (char *)calloc(sizeof(char), canvas->w * canvas->h + 1);
+	return (memset(ret, canvas->bg, canvas->w * canvas->h));
 }
 
-void print_draw(char *canvas, t_zone *zone)
+int ft_check_shape(t_shape *shape)
 {
-    int i = 0;
-
-    while (i < zone->h)
-    {
-        write(1, canvas + (i * zone->w), zone->w);
-        write(1, "\n", 1);
-        i++;
-    }
+	return (shape->w > 0.00000000 && shape->h > 0.00000000 
+			&& (shape->type == 'r' || shape->type == 'R'));
 }
 
+int is_in_rectangle(float x, float y, t_shape *shape)
+{
+	float c = 1.00000000;
+	if ((x < shape->x) || (shape->x + shape->w < x) ||
+		 (y < shape->y) || (shape->y + shape->h < y))
+		return (0);
+	if ((x - shape->x < c) || ((shape->x + shape->w) - x < c) ||
+		(y - shape->y < c) || ((shape->y + shape->h) - y < c))
+		return (2);
+	return (1);
+}
+
+void ft_draw_shape(char **canvas, t_shape *shape, t_canvas *zone)
+{
+	int i = -1;
+	int j = 0; 
+	int is_drawable = 0;
+
+	while (++i < zone->h)
+	{
+		j = -1;
+		while(++j < zone->w)
+		{
+			is_drawable = is_in_rectangle(j, i, shape);
+			if ((shape->type == 'r' && is_drawable == 2) ||
+				(shape->type == 'R' && is_drawable))
+				(*canvas)[i * zone->w + j] = shape->color;
+		}
+	}
+}
+
+int	ft_paint_shapes(FILE *file, char **canvas, t_canvas *zone)
+{
+	t_shape tmp = {0};
+	int count  ;
+	while ((count = fscanf(file, "%c %f %f %f %f %c\n", &tmp.type, &tmp.x, &tmp.y, &tmp.w, &tmp.h, &tmp.color)) == 6)
+	{
+		if (!ft_check_shape(&tmp))
+			return (0);
+		ft_draw_shape(canvas, &tmp, zone);
+	}
+	if (count != -1)
+		return (0);
+	return (1);
+}
+
+void ft_paint(char *canvas, t_canvas *zone)
+{
+	int i = -1;
+	while (++i < zone->h)
+	{
+		write(1, canvas + (i * zone->w), zone->w);
+		write(1, "\n", 1);
+	}
+}
 
 int main(int argc, char *argv[])
 {
-    FILE *fd = NULL;
-    t_zone zone = {0};
-    char *canvas = NULL;
-    int exit_code = 0;
-    t_rec line = {0};
+	t_canvas zone = {0};
+	int ret = 0;
+	FILE *file = NULL;
+	char *canvas = NULL;
 
-	if (argc != 2)  {
-		return(ft_putstr(ARG_ERR, 1));
-    }   else  if (!(fd = fopen(argv[1], "r")))  {
-        return(ft_putstr(F_ERR, 1)); 
-    }   else if (!(canvas = ft_check_draw_zone(fd, &zone))) {
-        exit_code = ft_putstr(F_ERR, 1); 
-    }   else if (!read_config(fd, &line)) {
-        exit_code = ft_putstr(F_ERR, 1); 
-    }
-    if (canvas) {
-        print_draw(canvas, &zone);
-        free(canvas);
-    }
-    fclose(fd);
-	return (exit_code);
+	if (argc != 2)
+		ret = ft_putstr(ERR_ARG, 1);
+	else if (!(file = fopen(argv[1], "r"))) {
+		ret = ft_putstr(ERR_OPFILE, 1);
+	} else if (!(canvas = ft_make_canvas(&zone, file))) {
+		ret = ft_putstr(ERR_OPFILE, 1);
+	} else if (!(ft_paint_shapes(file, &canvas, &zone)))
+		ret = ft_putstr(ERR_OPFILE, 1);
+	ft_paint(canvas, &zone);
+	if (file)
+		fclose(file);
+	if (canvas)
+		free(canvas);
+	return (ret);
 }
+
