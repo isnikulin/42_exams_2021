@@ -1,0 +1,6 @@
+**/*cmake*
+.idea
+.DS_Store
+**/a.out
+**/*.swp
+**/*.swo
