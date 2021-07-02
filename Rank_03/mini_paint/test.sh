@@ -1,8 +1,8 @@
 #! /bin/bash
 
-ORIG="our_micro_paint.c"
+ORIG="our_mini_paint.c"
 ORIG_EXEC="original"
-CUST="micro.c"
+CUST="mini.c"
 CUST_EXEC="custom"
 
 gcc $ORIG -o $ORIG_EXEC -Wall -Wextra -Werror -lm
