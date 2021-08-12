@@ -1,8 +1,8 @@
 #include <unistd.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/wait.h>
 
 #define ERR_FATAL "error: fatal"
 #define ERR_CD_ARG "error: cd: bad arguments"
@@ -58,7 +58,7 @@ char *ft_strdup(char *s) {
 void ft_lstaddback(t_cmd **start, t_cmd *new) {
 	t_cmd *tmp = NULL;
 	if (!(*start)) {
-		*start = new;    //?
+		*start = new;
 	} else {
 		tmp = *start;
 		while (tmp->next) {
@@ -71,16 +71,16 @@ void ft_lstaddback(t_cmd **start, t_cmd *new) {
 
 /*	EXIT functions	*/
 void exit_message(char *s, bool flag_exit) {
-	write(2, s, ft_strlen(s));
-	write(2, "\n", 1);
+	write(STDERR, s, ft_strlen(s));
+	write(STDERR, "\n", 1);
 	if (flag_exit)
 		exit(EXIT_FAILURE);
 }
 
 void exit_2_messages(char *s, char *s2, bool flag_exit) {
-	write(2, s, ft_strlen(s));
-	write(2, s2, ft_strlen(s2));
-	write(2, "\n", 1);
+	write(STDERR, s, ft_strlen(s));
+	write(STDERR, s2, ft_strlen(s2));
+	write(STDERR, "\n", 1);
 	if (flag_exit)
 		exit(EXIT_FAILURE);
 }
@@ -133,7 +133,6 @@ int parse_args(t_cmd **start, char **argv) {
 /*exec*/
 void exec_cmd(t_cmd *cmd, char *env[]) {
 	bool pipes = false;
-	pid_t pid;
 	int status = 0;
 
 	if (cmd->type == TYPE_PIPE || (cmd->prev && cmd->prev->type == TYPE_PIPE)) {
@@ -141,7 +140,7 @@ void exec_cmd(t_cmd *cmd, char *env[]) {
 		pipe(cmd->fd);
 	}
 
-	pid = fork();
+	pid_t pid = fork();
 	if (pid < 0) {
 		exit_message(ERR_FATAL, true);
 	} else if (pid == 0) {    //child
@@ -187,10 +186,26 @@ void exec_cmds(t_cmd *start, char *env[]) {
 }
 
 /* main */
+void free_all(t_cmd *ptr) {
+	t_cmd *tmp = ptr;
+
+	while (tmp) {
+		ptr = tmp;
+		if (tmp->argv) {
+			for (int i = 0; i < tmp->size; i++) {
+				free(tmp->argv[i]);
+			}
+			free(tmp->argv);
+		}
+		tmp = ptr->next;
+		free(ptr);
+	}
+	ptr = NULL;
+}
+
 int main(int argc, char *argv[], char *env[]) {
 	if (argc <= 1)
 		return (EXIT_SUCCESS);
-	(void) env;
 	int i = 1;
 	t_cmd *start = NULL;
 
@@ -199,7 +214,7 @@ int main(int argc, char *argv[], char *env[]) {
 			i++;
 			continue;
 		} else {
-			i += parse_args(&start, &argv[i]);    //parse_args
+			i += parse_args(&start, &argv[i]);
 		}
 		if (!argv[i]) {
 			break;
@@ -207,14 +222,9 @@ int main(int argc, char *argv[], char *env[]) {
 			i++;
 		}
 	}
-	//	printf("Parsed struct, cycle: %d:\n size = '%d', type = '%d', cmd: %s, argv:\n", i, start->size,start->type, start->cmd);
-	//	for (int j = 0; j < start->size; ++j) {
-	//		printf("'%s'\n", start->argv[j]);
-	//	}
 	if (start) {
 		exec_cmds(start, env);
 	}
-	//	while (1);
+	free_all(start);
 	return (EXIT_SUCCESS);
-
 }
