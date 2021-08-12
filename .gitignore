@@ -2,5 +2,6 @@
 .idea
 .DS_Store
 **/a.out
+**/a.out*
 **/*.swp
 **/*.swo
