@@ -7,3 +7,6 @@ SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g")
 
 add_executable(42_exams_2021
         Rank_04/microshell/microshell.c)
+
+add_executable(microshell_orig
+        Rank_04/microshell/microsh-bak.c)

@@ -111,7 +111,7 @@ void ft_lstadd_back(t_base **ptr, t_base *new)
 	}
 }
 
-int ssize_argv(char **argv)
+int size_argv(char **argv)
 {
 	int i = 0;
 	while (argv[i] && strcmp(argv[i], "|") != 0 && strcmp(argv[i], ";") != 0)
